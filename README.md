@@ -46,7 +46,7 @@ The following **additional** features are implemented:
 
 Here's a walkthrough of implemented user stories:
 
-<img src=walkthrough1.gif width=500 height=600/>
+<img src=walkthrough1.gif height=500/>
 
 GIF created with [LiceCap](http://www.cockos.com/licecap/).
 
