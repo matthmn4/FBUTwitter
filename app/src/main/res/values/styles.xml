@@ -22,7 +22,7 @@
     <color name="medium_red">#ffe0245e</color>
     <color name="medium_red_30">#4de0245e</color>
     <color name="medium_red_50">#80e0245e</color>
-    <color name="twitter_blue">#ff1da1f2</color>
+    <color name="twitter_blue"></color>
     <color name="twitter_blue_30">#4d1da1f2</color>
     <color name="twitter_blue_50">#801da1f2</color>
     <color name="twitter_blue_fill_pressed">#ff1370a9</color>
@@ -32,6 +32,6 @@
     <color name="inline_action_like_pressed">@color/medium_red_50</color>
     <color name="inline_action_pressed">@color/medium_gray_50</color>
     <color name="inline_action_retweet">@color/medium_green</color>
-    <color name="inline_action_retweet_pressed">@color/medium_gray_50</color>
-
+    <color name="unliked">#FFDDF3FF</color>
+    <color name="blank">#FFFFFFFF</color>
 </resources>

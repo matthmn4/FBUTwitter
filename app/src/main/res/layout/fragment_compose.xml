@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".ComposeFragment">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#DDF3FF"
+        tools:context=".ComposeActivity">
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/wordCounter"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/ivTweetProfile"
+            android:layout_marginTop="5dp"
+            app:counterEnabled="true"
+            app:counterMaxLength="180">
+
+            <EditText
+                android:id="@+id/etCompose"
+                android:layout_width="match_parent"
+                android:layout_height="417dp"
+                android:layout_below="@+id/ivProfile"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginStart="5dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginEnd="9dp"
+                android:ems="10"
+                android:gravity="start|top"
+                android:hint="What's happening?"
+                android:inputType="textMultiLine"
+                android:minLines="5"
+                android:textColor="#FFFFFF"
+                android:textColorHint="#B0D4ED" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+
+        <Button
+            android:id="@+id/btnTweet"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/wordCounter"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="10dp"
+            android:background="#4FB0EF"
+            android:text="Tweet"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#FFFFFF" />
+
+        <ImageView
+            android:id="@+id/ivTweetProfile"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="10dp"
+            tools:srcCompat="@tools:sample/avatars" />
+
+        <TextView
+            android:id="@+id/tvTweetName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="15dp"
+            android:layout_toEndOf="@+id/ivTweetProfile"
+            android:text="Mattyb"
+            android:textColor="#4FB0EF" />
+
+        <TextView
+            android:id="@+id/tvTweetHandle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tvTweetName"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="2dp"
+            android:layout_toEndOf="@+id/ivTweetProfile"
+            android:text="themattybx"
+            android:textColor="#4FB0EF" />
+    </RelativeLayout>
+
+</FrameLayout>

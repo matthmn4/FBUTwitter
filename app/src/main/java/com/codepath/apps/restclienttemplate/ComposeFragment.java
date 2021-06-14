@@ -1,17 +1,21 @@
 package com.codepath.apps.restclienttemplate;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.DialogFragment;
 
 import com.bumptech.glide.Glide;
 import com.codepath.apps.restclienttemplate.models.Tweet;
@@ -24,7 +28,8 @@ import org.parceler.Parcels;
 
 import okhttp3.Headers;
 
-public class ComposeActivity extends AppCompatActivity {
+
+public class ComposeFragment extends DialogFragment {
 
     EditText etCompose;
     Button btnTweet;
@@ -32,35 +37,34 @@ public class ComposeActivity extends AppCompatActivity {
     TextView tvTweetHandle;
     TextView tvName;
     ImageView ivTweetProfile;
-    Boolean reply;
+
     TwitterClient client;
 
 
+    public ComposeFragment() {
+    }
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_compose);
-        client = TwitterApp.getRestClient(this);
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        client = TwitterApp.getRestClient(getContext());
+        tvName = view.findViewById(R.id.tvTweetName);
+        tvTweetHandle = view.findViewById(R.id.tvTweetHandle);
+        ivTweetProfile = view.findViewById(R.id.ivTweetProfile);
+        etCompose = view.findViewById(R.id.etCompose);
+        btnTweet = view.findViewById(R.id.btnTweet);
 
-        tvName = findViewById(R.id.tvTweetName);
-        tvTweetHandle = findViewById(R.id.tvTweetHandle);
-        ivTweetProfile = findViewById(R.id.ivTweetProfile);
-        etCompose = findViewById(R.id.etCompose);
-        btnTweet = findViewById(R.id.btnTweet);
-
-        reply = getIntent().getExtras().getBoolean("reply");
         getUser();
-
 
         btnTweet.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String tweetContent = etCompose.getText().toString();
                 if (tweetContent.isEmpty()) {
-                    Toast.makeText(ComposeActivity.this, "Sorry, tweet cannot be empty", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Sorry, tweet cannot be empty", Toast.LENGTH_SHORT).show();
                 }
                 if (tweetContent.length() > 140) {
-                    Toast.makeText(ComposeActivity.this, "Sorry, your tweet is too long", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Sorry, your tweet is too long", Toast.LENGTH_SHORT).show();
                 }
                 client.sendTweet(tweetContent, new JsonHttpResponseHandler() {
                     @Override
@@ -69,8 +73,8 @@ public class ComposeActivity extends AppCompatActivity {
                             Tweet tweet = Tweet.fromJson(json.jsonObject);
                             Intent intent = new Intent();
                             intent.putExtra("tweet", Parcels.wrap(tweet));
-                            setResult(RESULT_OK, intent);
-                            finish();
+                            //setResult(RESULT_OK, intent);
+                            //finish();
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -83,16 +87,31 @@ public class ComposeActivity extends AppCompatActivity {
                 });
             }
         });
+
+        etCompose.requestFocus();
+        getDialog().getWindow().setSoftInputMode(
+                WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+
+    }
+
+    public static ComposeFragment newInstance(String title) {
+        ComposeFragment frag = new ComposeFragment();
+        Bundle args = new Bundle();
+        args.putString("title", title);
+        //args.putString("screenName", tvTweetHandle);
+        frag.setArguments(args);
+        return frag;
+    }
+
+
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
     }
 
     private void getUser() {
-        String scrname = "";
-        if (reply) {
-            scrname = getIntent().getExtras().getString("user");
-        }
-        final String finalScrname = scrname;
         client.getProfile(new JsonHttpResponseHandler() {
-            @SuppressLint("SetTextI18n")
             @Override
             public void onSuccess(int statusCode, Headers headers, JSON json) {
                 JSONObject JSONUser = json.jsonObject;
@@ -101,13 +120,10 @@ public class ComposeActivity extends AppCompatActivity {
                     user = User.fromJson(JSONUser);
                     tvTweetHandle.setText(String.format("@%s", user.screenName));
                     tvName.setText(user.name);
-                    Glide.with(getApplicationContext())
+                    Glide.with(getContext())
                             .load(user.profileImageUrl)
                             .circleCrop()
                             .into(ivTweetProfile);
-                    if (reply) {
-                        etCompose.setText(String.format("@%s", finalScrname));
-                    }
                     Log.d("Compose", user.name);
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -120,4 +136,12 @@ public class ComposeActivity extends AppCompatActivity {
             }
         });
     }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_compose, container, false);
+    }
+
+
 }

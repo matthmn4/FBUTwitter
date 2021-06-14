@@ -15,6 +15,8 @@ public class Tweet {
     public User user;
     public String media_url;
     public Long id;
+    public Boolean liked;
+    public Boolean retweeted;
 
     public static Tweet fromJson(JSONObject jsonObject) throws JSONException {
         Tweet tweet = new Tweet();
@@ -22,6 +24,8 @@ public class Tweet {
         tweet.createdAt = jsonObject.getString("created_at");
         tweet.user = User.fromJson(jsonObject.getJSONObject("user"));
         JSONObject entities = jsonObject.getJSONObject("entities");
+        tweet.liked = jsonObject.getBoolean("favorited");
+        tweet.retweeted = jsonObject.getBoolean("retweeted");
         tweet.id = jsonObject.getLong("id");
         if (entities.has("media")){
             tweet.media_url = entities.getJSONArray("media").getJSONObject(0).getString("media_url_https");

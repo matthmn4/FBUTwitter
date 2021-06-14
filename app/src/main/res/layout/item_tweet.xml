@@ -70,6 +70,9 @@
             android:layout_marginTop="5dp"
             android:layout_marginEnd="10dp"
             android:layout_toEndOf="@+id/ivProfile"
+            android:maxLines="8"
+            android:autoLink="all"
+            android:linksClickable="true"
             android:text="hello my name is mattyb and this is my twitter app for facebook university hope you like it" />
 
         <ImageView
@@ -107,13 +110,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="100dp"
-            android:layout_toEndOf="@+id/btnRetweet3"
+            android:layout_toEndOf="@+id/btnMessage"
             android:backgroundTint="#DDF3FF"
             android:baselineAlignBottom="false"
-            app:srcCompat="@drawable/ic_vector_retweet" />
+            app:srcCompat="@drawable/ic_vector_retweet_stroke" />
 
         <ImageButton
-            android:id="@+id/btnRetweet3"
+            android:id="@+id/btnMessage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"

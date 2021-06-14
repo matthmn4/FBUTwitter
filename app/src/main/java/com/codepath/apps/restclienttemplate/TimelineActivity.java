@@ -9,12 +9,14 @@ import android.widget.ProgressBar;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.codepath.apps.restclienttemplate.adapters.TweetsAdapter;
 import com.codepath.apps.restclienttemplate.models.Tweet;
+import com.codepath.apps.restclienttemplate.models.User;
 import com.codepath.asynchttpclient.callback.JsonHttpResponseHandler;
 
 import org.json.JSONArray;
@@ -26,7 +28,7 @@ import java.util.List;
 
 import okhttp3.Headers;
 
-public class TimelineActivity extends AppCompatActivity {
+public class TimelineActivity extends AppCompatActivity implements TweetsAdapter.OnTweetClickListener {
 
     public static final String TAG = "TimelineActivity";
     public static final int REQUEST_CODE = 20;
@@ -52,7 +54,7 @@ public class TimelineActivity extends AppCompatActivity {
         rvTweets = findViewById(R.id.rvTweets);
 
         tweets = new ArrayList<>();
-        adapter = new TweetsAdapter(this, tweets);
+        adapter = new TweetsAdapter(this, this, tweets);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         rvTweets.setLayoutManager(layoutManager);
         rvTweets.setAdapter(adapter);
@@ -82,6 +84,7 @@ public class TimelineActivity extends AppCompatActivity {
             }
         };
         rvTweets.addOnScrollListener(scrollListener);
+        rvTweets.addItemDecoration(new DividerItemDecoration(rvTweets.getContext(), DividerItemDecoration.VERTICAL));
 
 
         populateHomeTimeline();
@@ -169,6 +172,7 @@ public class TimelineActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.compose) {
             Intent i = new Intent(this, ComposeActivity.class);
+            i.putExtra("reply", false);
             startActivityForResult(i, REQUEST_CODE);
             return true;
         }
@@ -184,6 +188,70 @@ public class TimelineActivity extends AppCompatActivity {
             rvTweets.smoothScrollToPosition(0);
         }
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+
+    @Override
+    public void onProfileImageClick(User user) {
+
+    }
+
+    @Override
+    public void onFavoriteClick(final int pos, boolean isChecked) {
+        if (!isChecked) {
+            client.favoriteTweet(tweets.get(pos).id, new JsonHttpResponseHandler() {
+                @Override
+                public void onSuccess(int statusCode, Headers headers, JSON json) {
+                    Log.d(TAG, "Tweet was liked.");
+                    Log.d("test", "test2: " + tweets.get(pos));
+                    tweets.get(pos).liked = true;
+                }
+
+                @Override
+                public void onFailure(int statusCode, Headers headers, String response, Throwable throwable) {
+                    Log.d(TAG, "Tweet had a problem liking.");
+                }
+            });
+        } else {
+            client.unfavoriteTweet(tweets.get(pos).id, new JsonHttpResponseHandler() {
+                @Override
+                public void onSuccess(int statusCode, Headers headers, JSON json) {
+                    Log.d(TAG, "Tweet was unliked.");
+                    tweets.get(pos).liked = false;
+                }
+
+                @Override
+                public void onFailure(int statusCode, Headers headers, String response, Throwable throwable) {
+                    Log.d(TAG, "Tweet had a problem liking.");
+                }
+            });
+        }
+    }
+
+    @Override
+    public void onReplyClick(int pos) {
+        Intent i = new Intent(this, ComposeActivity.class);
+        i.putExtra("user", tweets.get(pos).user.screenName);
+        i.putExtra("reply", true);
+        startActivityForResult(i, REQUEST_CODE);
+    }
+
+    @Override
+    public void onRetweet(final int pos, boolean isChecked) {
+        if (!isChecked) {
+            client.retweet(tweets.get(pos).id, new JsonHttpResponseHandler() {
+                @Override
+                public void onSuccess(int statusCode, Headers headers, JSON json) {
+                    Log.d(TAG, "Tweet was retweeted.");
+                    tweets.get(pos).retweeted = true;
+                }
+
+                @Override
+                public void onFailure(int statusCode, Headers headers, String response, Throwable throwable) {
+                    Log.d(TAG, "Tweet had a problem liking.");
+                }
+            });
+        }
     }
 
 

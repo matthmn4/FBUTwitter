@@ -2,12 +2,14 @@ package com.codepath.apps.restclienttemplate.adapters;
 
 import android.content.Context;
 import android.text.format.DateUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -15,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.codepath.apps.restclienttemplate.R;
 import com.codepath.apps.restclienttemplate.models.Tweet;
+import com.codepath.apps.restclienttemplate.models.User;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -22,6 +25,21 @@ import java.util.List;
 import java.util.Locale;
 
 public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder>{
+
+    private OnTweetClickListener listener;
+
+    public interface OnTweetClickListener {
+        void onProfileImageClick(User user);
+        void onFavoriteClick(int pos, boolean isChecked);
+        void onReplyClick(int pos);
+        void onRetweet(int pos, boolean isChecked);
+    }
+
+    public TweetsAdapter(OnTweetClickListener listener, Context context, List<Tweet> tweets) {
+        this.listener = listener;
+        this.context = context;
+        this.tweets = tweets;
+    }
 
     private static final int SECOND_MILLIS = 1000;
     private static final int MINUTE_MILLIS = 60 * SECOND_MILLIS;
@@ -65,6 +83,7 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
         ImageView ivMedia;
         ImageButton btnRetweet;
         ImageButton btnLike;
+        ImageButton btnMessage;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -76,13 +95,20 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
             ivMedia = itemView.findViewById(R.id.ivMedia);
             btnRetweet = itemView.findViewById(R.id.btnRetweet);
             btnLike = itemView.findViewById(R.id.btnLike);
+            btnMessage = itemView.findViewById(R.id.btnMessage);
         }
 
-        public void bind(Tweet tweet) {
+        public void bind(final Tweet tweet) {
             tvBody.setText(tweet.body);
             tvScreenName.setText(String.format("@%s", tweet.user.screenName));
             tvName.setText(tweet.user.name);
             tvDate.setText(getRelativeTimeAgo(tweet.createdAt));
+            if(tweet.liked) {
+                //
+            }
+            if(tweet.retweeted) {
+                //btnRetweet
+            }
             Glide.with(context)
                     .load(tweet.user.profileImageUrl)
                     .circleCrop()
@@ -90,6 +116,42 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
             Glide.with(context)
                     .load(tweet.media_url)
                     .into(ivMedia);
+
+            btnLike.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (!tweet.liked) {
+                        listener.onFavoriteClick(getLayoutPosition(), false);
+                        Log.d("test", "hello :" + getLayoutPosition());
+                        Toast.makeText(context,"Tweet was liked!", Toast.LENGTH_SHORT).show();
+                        btnLike.setImageResource(R.drawable.ic_vector_heart);
+                    } else {
+                        listener.onFavoriteClick(getLayoutPosition(), true);
+                        Toast.makeText(context,"Tweet was unliked!", Toast.LENGTH_SHORT).show();
+                        btnLike.setImageResource(R.drawable.ic_vector_heart_stroke);
+                    }
+                }
+            });
+
+            btnRetweet.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Toast.makeText(context,"Tweet was retweeted!", Toast.LENGTH_SHORT).show();
+                    if (!tweet.retweeted) {
+                        listener.onRetweet(getLayoutPosition(), false);
+                        Log.d("test", "hello :" + getLayoutPosition());
+                        Toast.makeText(context,"Tweet was retweeted!", Toast.LENGTH_SHORT).show();
+                        btnRetweet.setImageResource(R.drawable.ic_vector_retweet);
+                    }
+                }
+            });
+
+            btnMessage.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    listener.onReplyClick(getLayoutPosition());
+                }
+            });
         }
     }
 
