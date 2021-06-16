@@ -51,6 +51,7 @@
         android:layout_toEndOf="@+id/ivFollowImage"
         android:maxLines="4"
         android:minLines="1"
+        android:padding="2dp"
         android:text="TextView"
         android:textColor="#104671" />
 

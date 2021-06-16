@@ -32,6 +32,7 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
         void onFavoriteClick(int pos, boolean isChecked);
         void onReplyClick(int pos);
         void onRetweet(int pos, boolean isChecked);
+        void onItemClick(View itemView, int position);
     }
 
     public TweetsAdapter(OnTweetClickListener listener, Context context, List<Tweet> tweets) {
@@ -48,7 +49,9 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
     Context context;
     List<Tweet> tweets;
 
-
+    public void setOnItemClickListener(OnTweetClickListener listener) {
+        this.listener = listener;
+    }
     public TweetsAdapter(Context context, List<Tweet> tweets) {
         this.context = context;
         this.tweets = tweets;
@@ -58,7 +61,7 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context).inflate(R.layout.item_tweet, parent, false);
-        return new ViewHolder(view);
+        return new ViewHolder(view, listener);
     }
 
     @Override
@@ -84,7 +87,7 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
         ImageButton btnLike;
         ImageButton btnMessage;
 
-        public ViewHolder(@NonNull View itemView) {
+        public ViewHolder(@NonNull final View itemView, final OnTweetClickListener clickListener) {
             super(itemView);
             ivProfileImage = itemView.findViewById(R.id.ivProfile);
             tvBody = itemView.findViewById(R.id.tvBody);
@@ -95,6 +98,13 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
             btnRetweet = itemView.findViewById(R.id.btnRetweet);
             btnLike = itemView.findViewById(R.id.btnLike);
             btnMessage = itemView.findViewById(R.id.btnMessage);
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    clickListener.onItemClick(itemView, getAdapterPosition());
+                }
+            });
         }
 
         public void bind(final Tweet tweet) {
