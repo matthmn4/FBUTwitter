@@ -13,8 +13,8 @@
 
         <ImageView
             android:id="@+id/ivProfile"
-            android:layout_width="45dp"
-            android:layout_height="45dp"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
             android:layout_marginStart="10dp"
@@ -99,7 +99,7 @@
             android:id="@+id/btnLike"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="75dp"
+            android:layout_marginStart="100dp"
             android:layout_toEndOf="@+id/btnRetweet"
             android:backgroundTint="#DDF3FF"
             android:baselineAlignBottom="false"

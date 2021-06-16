@@ -93,12 +93,27 @@ public class TwitterClient extends OAuthBaseClient {
 	}
 
 	public void unfavoriteTweet(Long tweetId, JsonHttpResponseHandler handler) {
-		String apiUrl = getApiUrl("/favorites/destroy.json");
+		String apiUrl = getApiUrl("favorites/destroy.json");
 
 		RequestParams params = new RequestParams();
 		params.put("id", tweetId);
 
 		client.post(apiUrl, params, "", handler);
+	}
+
+	public void getFollower(String id, JsonHttpResponseHandler handler) {
+		String apiUrl = getApiUrl("followers/list.json");
+		RequestParams params = new RequestParams();
+		params.put("user_id", id);
+		client.get(apiUrl, params, handler);
+	}
+
+
+	public void getFollowings(String id, JsonHttpResponseHandler handler) {
+		String apiUrl = getApiUrl("friends/list.json");
+		RequestParams params = new RequestParams();
+		params.put("user_id", id);
+		client.get(apiUrl, params, handler);
 	}
 
 	/* 1. Define the endpoint URL with getApiUrl and pass a relative path to the endpoint

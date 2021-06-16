@@ -5,10 +5,13 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ProgressBar;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -16,8 +19,8 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.codepath.apps.restclienttemplate.adapters.TweetsAdapter;
 import com.codepath.apps.restclienttemplate.models.Tweet;
-import com.codepath.apps.restclienttemplate.models.User;
 import com.codepath.asynchttpclient.callback.JsonHttpResponseHandler;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -28,7 +31,7 @@ import java.util.List;
 
 import okhttp3.Headers;
 
-public class TimelineActivity extends AppCompatActivity implements TweetsAdapter.OnTweetClickListener {
+public class TimelineActivity extends AppCompatActivity implements TweetsAdapter.OnTweetClickListener, ComposeFragment.ComposeFragmentDialogListener {
 
     public static final String TAG = "TimelineActivity";
     public static final int REQUEST_CODE = 20;
@@ -36,6 +39,7 @@ public class TimelineActivity extends AppCompatActivity implements TweetsAdapter
     ProgressBar pb;
     TwitterClient client;
     RecyclerView rvTweets;
+    private FloatingActionButton fab;
     TweetsAdapter adapter;
     List<Tweet> tweets;
 
@@ -51,8 +55,12 @@ public class TimelineActivity extends AppCompatActivity implements TweetsAdapter
         pb = (ProgressBar) findViewById(R.id.pbLoading);
         client = TwitterApp.getRestClient(this);
 
-        rvTweets = findViewById(R.id.rvTweets);
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.reuse_toolbar);
+        setSupportActionBar(myToolbar);
 
+
+        rvTweets = findViewById(R.id.rvTweets);
+        fab = findViewById(R.id.fab);
         tweets = new ArrayList<>();
         adapter = new TweetsAdapter(this, this, tweets);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
@@ -85,7 +93,14 @@ public class TimelineActivity extends AppCompatActivity implements TweetsAdapter
         };
         rvTweets.addOnScrollListener(scrollListener);
         rvTweets.addItemDecoration(new DividerItemDecoration(rvTweets.getContext(), DividerItemDecoration.VERTICAL));
-
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FragmentManager fm = getSupportFragmentManager();
+                ComposeFragment composeFragment = ComposeFragment.newInstance(false);
+                composeFragment.show(fm, "Compose a tweet");
+            }
+        });
 
         populateHomeTimeline();
     }
@@ -171,12 +186,22 @@ public class TimelineActivity extends AppCompatActivity implements TweetsAdapter
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.compose) {
-            Intent i = new Intent(this, ComposeActivity.class);
-            i.putExtra("reply", false);
-            startActivityForResult(i, REQUEST_CODE);
+            //Intent i = new Intent(this, ComposeActivity.class);
+            //i.putExtra("reply", false);
+            //startActivityForResult(i, REQUEST_CODE);
+            FragmentManager fm = getSupportFragmentManager();
+            ComposeFragment composeFragment = ComposeFragment.newInstance(false);
+            composeFragment.show(fm, "Compose a tweet");
+
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public void onFloatingComposeClick() {
+        FragmentManager fm = getSupportFragmentManager();
+        ComposeFragment composeFragment = ComposeFragment.newInstance(false);
+        composeFragment.show(fm, "Compose a tweet");
     }
 
     @Override
@@ -192,8 +217,10 @@ public class TimelineActivity extends AppCompatActivity implements TweetsAdapter
 
 
     @Override
-    public void onProfileImageClick(User user) {
-
+    public void onProfileImageClick(Tweet tweet) {
+        Intent pi = new Intent(TimelineActivity.this, FollowActivity.class);
+        pi.putExtra("user", Parcels.wrap(tweet));
+        startActivity(pi);
     }
 
     @Override
@@ -231,9 +258,12 @@ public class TimelineActivity extends AppCompatActivity implements TweetsAdapter
     @Override
     public void onReplyClick(int pos) {
         Intent i = new Intent(this, ComposeActivity.class);
-        i.putExtra("user", tweets.get(pos).user.screenName);
-        i.putExtra("reply", true);
-        startActivityForResult(i, REQUEST_CODE);
+//        i.putExtra("user", tweets.get(pos).user.screenName);
+//        i.putExtra("reply", true);
+//        startActivityForResult(i, REQUEST_CODE);
+        FragmentManager fm = getSupportFragmentManager();
+        ComposeFragment composeFragment = ComposeFragment.newInstance(true, tweets.get(pos).user.screenName);
+        composeFragment.show(fm, "Reply to a tweet");
     }
 
     @Override
@@ -255,4 +285,10 @@ public class TimelineActivity extends AppCompatActivity implements TweetsAdapter
     }
 
 
+    @Override
+    public void onFinishCompose(Tweet tweet) {
+        tweets.add(0, tweet);
+        adapter.notifyItemInserted(0);
+        rvTweets.smoothScrollToPosition(0);
+    }
 }

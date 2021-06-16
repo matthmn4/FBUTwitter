@@ -17,7 +17,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.codepath.apps.restclienttemplate.R;
 import com.codepath.apps.restclienttemplate.models.Tweet;
-import com.codepath.apps.restclienttemplate.models.User;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -29,7 +28,7 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
     private OnTweetClickListener listener;
 
     public interface OnTweetClickListener {
-        void onProfileImageClick(User user);
+        void onProfileImageClick(Tweet tweet);
         void onFavoriteClick(int pos, boolean isChecked);
         void onReplyClick(int pos);
         void onRetweet(int pos, boolean isChecked);
@@ -104,10 +103,10 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
             tvName.setText(tweet.user.name);
             tvDate.setText(getRelativeTimeAgo(tweet.createdAt));
             if(tweet.liked) {
-                //
+                btnLike.setImageResource(R.drawable.ic_vector_heart_stroke);
             }
             if(tweet.retweeted) {
-                //btnRetweet
+                btnRetweet.setImageResource(R.drawable.ic_vector_retweet);
             }
             Glide.with(context)
                     .load(tweet.user.profileImageUrl)
@@ -116,6 +115,13 @@ public class TweetsAdapter extends RecyclerView.Adapter<TweetsAdapter.ViewHolder
             Glide.with(context)
                     .load(tweet.media_url)
                     .into(ivMedia);
+
+            ivProfileImage.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    listener.onProfileImageClick(tweet);
+                }
+            });
 
             btnLike.setOnClickListener(new View.OnClickListener() {
                 @Override

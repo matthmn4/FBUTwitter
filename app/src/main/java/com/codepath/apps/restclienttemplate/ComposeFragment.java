@@ -1,6 +1,7 @@
 package com.codepath.apps.restclienttemplate;
 
-import android.content.Intent;
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -24,7 +25,6 @@ import com.codepath.asynchttpclient.callback.JsonHttpResponseHandler;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.parceler.Parcels;
 
 import okhttp3.Headers;
 
@@ -37,11 +37,25 @@ public class ComposeFragment extends DialogFragment {
     TextView tvTweetHandle;
     TextView tvName;
     ImageView ivTweetProfile;
-
+    Boolean reply;
     TwitterClient client;
+    ComposeFragmentDialogListener listener;
 
+    public interface ComposeFragmentDialogListener {
+        void onFinishCompose(Tweet tweet);
+    }
 
     public ComposeFragment() {
+    }
+
+    @Override public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof ComposeFragmentDialogListener) {
+            listener = (ComposeFragmentDialogListener) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement ComposeFragmentDialogListener");
+        }
     }
 
     @Override
@@ -71,10 +85,10 @@ public class ComposeFragment extends DialogFragment {
                     public void onSuccess(int i, Headers headers, JSON json) {
                         try {
                             Tweet tweet = Tweet.fromJson(json.jsonObject);
-                            Intent intent = new Intent();
-                            intent.putExtra("tweet", Parcels.wrap(tweet));
-                            //setResult(RESULT_OK, intent);
-                            //finish();
+                            Log.d("fragment", tweet.toString());
+                            listener.onFinishCompose(tweet);
+                            getDialog().dismiss();
+
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -94,24 +108,38 @@ public class ComposeFragment extends DialogFragment {
 
     }
 
-    public static ComposeFragment newInstance(String title) {
+    public static ComposeFragment newInstance(Boolean reply) {
         ComposeFragment frag = new ComposeFragment();
         Bundle args = new Bundle();
-        args.putString("title", title);
-        //args.putString("screenName", tvTweetHandle);
+        args.putBoolean("reply", reply);
+        frag.setArguments(args);
+        return frag;
+    }
+
+    public static ComposeFragment newInstance(Boolean reply, String handle) {
+        ComposeFragment frag = new ComposeFragment();
+        Bundle args = new Bundle();
+        args.putBoolean("reply", reply);
+        args.putString("user", handle);
         frag.setArguments(args);
         return frag;
     }
 
 
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        reply = getArguments().getBoolean("reply");
     }
 
     private void getUser() {
+        String scrname = "";
+        if (reply) {
+            scrname = getArguments().getString("user");
+        }
+        final String finalScrname = scrname;
         client.getProfile(new JsonHttpResponseHandler() {
+            @SuppressLint("SetTextI18n")
             @Override
             public void onSuccess(int statusCode, Headers headers, JSON json) {
                 JSONObject JSONUser = json.jsonObject;
@@ -120,10 +148,13 @@ public class ComposeFragment extends DialogFragment {
                     user = User.fromJson(JSONUser);
                     tvTweetHandle.setText(String.format("@%s", user.screenName));
                     tvName.setText(user.name);
-                    Glide.with(getContext())
+                    Glide.with(getActivity())
                             .load(user.profileImageUrl)
                             .circleCrop()
                             .into(ivTweetProfile);
+                    if (reply) {
+                        etCompose.setText(String.format("@%s", finalScrname));
+                    }
                     Log.d("Compose", user.name);
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -142,6 +173,11 @@ public class ComposeFragment extends DialogFragment {
                              Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_compose, container, false);
     }
-
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        listener= null;
+        Log.d("fragment", "on detached");
+    }
 
 }
